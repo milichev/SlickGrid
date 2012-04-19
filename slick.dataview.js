@@ -7,7 +7,9 @@
           Avg: AvgAggregator,
           Min: MinAggregator,
           Max: MaxAggregator,
-          Sum: SumAggregator
+          Sum: SumAggregator,
+          CheckCount: CheckCountAggregator,
+          DateRange: DateRangeAggregator
         }
       }
     }
@@ -902,7 +904,65 @@
       groupTotals.sum[this.field_] = this.sum_;
     }
   }
+  
+  function CheckCountAggregator(field) {
+    this.field_ = field;
 
+    this.init = function () {
+      this.count_ = 0;
+      this.checkCount_ = 0;
+      this.nonNullCount_ = 0;
+    };
+
+    this.accumulate = new Function("item", '\
+      var val = item.' + this.field_ + ';\
+      this.count_++;\
+      if (val === true)\
+        this.checkCount_++;');
+
+    this.storeResult = function (groupTotals) {
+      if (!groupTotals.checkCount)
+        groupTotals.checkCount = {};
+
+      groupTotals.checkCount[this.field_] = {
+        checked: this.checkCount_,
+        count: this.count_
+      };
+    };
+  }
+  
+  function DateRangeAggregator(field) {
+    this.field_ = field;
+
+    this.init = function () {
+      this.count_ = 0;
+      this.min_ = null;
+      this.max_ = null;
+    };
+
+    this.accumulate = new Function("item", '\
+      var val = item.' + this.field_ + ';\
+      this.count_++;\
+      if ($.type(val) === "date") {\
+        val = val.valueOf();\
+        if (this.min_ === null || this.min_ > val)\
+          this.min_ = val;\
+        if (this.max_ === null || this.max_ < val)\
+          this.max_ = val;\
+      }\
+      ');
+
+    this.storeResult = function (groupTotals) {
+      if (!groupTotals.dateRange)
+        groupTotals.dateRange = {};
+
+      groupTotals.dateRange[this.field_] = {
+        min: this.min_ === null ? null : new Date(this.min_),
+        max: this.max_ === null ? null : new Date(this.max_)
+      };
+    };
+  }
+  
   // TODO:  add more built-in aggregators
   // TODO:  merge common aggregators in one to prevent needles iterating
 
