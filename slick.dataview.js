@@ -39,7 +39,7 @@
     var rowsById = null;    // rows by id; lazy-calculated
     var filter = null;      // filter function
     var updated = null;     // updated item ids
-    var suspendCount = 0;   // suspends the recalculation
+    var suspendCount = 0;   // if > 0, suspends the recalculation
     var sortAsc = true;
     var fastSortField;
     var sortComparer;
