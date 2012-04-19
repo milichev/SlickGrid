@@ -39,7 +39,7 @@
     var rowsById = null;    // rows by id; lazy-calculated
     var filter = null;      // filter function
     var updated = null;     // updated item ids
-    var suspend = false;    // suspends the recalculation
+    var suspendCount = 0;   // suspends the recalculation
     var sortAsc = true;
     var fastSortField;
     var sortComparer;
@@ -75,12 +75,14 @@
 
 
     function beginUpdate() {
-      suspend = true;
+      suspendCount++;
     }
 
     function endUpdate() {
-      suspend = false;
+      suspendCount--;
+      if (suspendCount === 0) {
       refresh();
+    }
     }
 
     function setRefreshHints(hints) {
@@ -667,7 +669,7 @@
     }
 
     function refresh() {
-      if (suspend) {
+      if (suspendCount > 0) {
         return;
       }
 
