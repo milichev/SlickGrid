@@ -96,7 +96,7 @@ var columns = [
   {id: "%", name: "% Complete", field: "percentComplete", width: 80, formatter: Slick.Formatters.PercentCompleteBar, sortable: true, groupTotalsFormatter: avgTotalsFormatter},
   {id: "start", name: "Start", field: "start", minWidth: 60, sortable: true},
   {id: "finish", name: "Finish", field: "finish", minWidth: 60, sortable: true},
-  {id: "effort-driven", name: "Effort Driven", width: 80, minWidth: 20, maxWidth: 80, cssClass: "cell-effort-driven", field: "effortDriven", formatter: Slick.Formatters.Checkmark, sortable: true}
+  {id: "effort-driven", name: "Effort Driven", width: 80, minWidth: 20, maxWidth: 80, cssClass: "cell-effort-driven", field: "effortDriven", formatter: Slick.Formatters.Checkmark, sortable: true, groupTotalsFormatter: checkCountFormatter}
 ];
 
 var options = {
@@ -111,6 +111,10 @@ var prevPercentCompleteThreshold = 0;
 
 function avgTotalsFormatter(totals, columnDef) {
   return "avg: " + Math.round(totals.avg[columnDef.field]) + "%";
+}
+function checkCountFormatter(totals, columnDef) {
+  var info = totals.checkCount[columnDef.field];
+  return info ? info.checked + " of " + info.count : "";
 }
 
 function myFilter(item, args) {
@@ -157,8 +161,9 @@ function groupByDuration() {
       }
   );
   dataView.setAggregators([
-    new Slick.Data.Aggregators.Avg("percentComplete")
-  ], false);
+    new Slick.Data.Aggregators.Avg("percentComplete"),
+    new Slick.Data.Aggregators.CheckCount("effortDriven")	
+  ], true);
 }
 
 function groupByDurationOrderByCount() {

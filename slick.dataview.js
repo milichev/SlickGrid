@@ -913,7 +913,6 @@
     this.init = function () {
       this.count_ = 0;
       this.checkCount_ = 0;
-      this.nonNullCount_ = 0;
     };
 
     this.accumulate = new Function("item", '\
@@ -937,15 +936,13 @@
     this.field_ = field;
 
     this.init = function () {
-      this.count_ = 0;
       this.min_ = null;
       this.max_ = null;
     };
 
     this.accumulate = new Function("item", '\
       var val = item.' + this.field_ + ';\
-      this.count_++;\
-      if ($.type(val) === "date") {\
+      if (val && val.valueOf) {\
         val = val.valueOf();\
         if (this.min_ === null || this.min_ > val)\
           this.min_ = val;\
